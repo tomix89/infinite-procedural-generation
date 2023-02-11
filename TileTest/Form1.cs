@@ -245,22 +245,16 @@ namespace TileTest {
                     // and therefore we have to test only the 
                     // below and the left tile
                     List<int> tilesToChose = new List<int>();
-                    for (int i = 0; i < tiles.Count; i++) {
+                    for (int tileId = 0; tileId < tiles.Count; tileId++) {
                         bool isFitting = true;
 
-                        if (bannedTiles.Contains(i)) {
+                        if (bannedTiles.Contains(tileId)) {
                             continue;
                         }
 
+                        // do not put cloud tiles below certein row
                         if (y > CANVAS_SIZE_Y - 6) {
-                            if (tiles[i].name.StartsWith("cloud")) {
-                                continue;
-                            }
-                        }
-
-                        // do not put sky or cloud tiles to the bottom most row
-                        if (y > CANVAS_SIZE_Y - 2) {
-                            if (tiles[i].name == "sky") {
+                            if (tiles[tileId].name.StartsWith("cloud")) {
                                 continue;
                             }
                         }
@@ -280,12 +274,22 @@ namespace TileTest {
                             }
 
                             // if in bounds, check the adjecent tile's constatints
-                            isFitting &= tiles[i].isTileMatching(adjDirections[adj], tiles[canvas[xn, yn]].map);
+                            isFitting &= tiles[tileId].isTileMatching(adjDirections[adj], tiles[canvas[xn, yn]].map);
                         }
 
                         if (isFitting) {
-                            tilesToChose.Add(i);
+                            tilesToChose.Add(tileId);
+
+                            // tweak a bit the probabilityes
+                            // as there are too much sky tiles without this
+                            if (tiles[tileId].name == "ground"
+                                || tiles[tileId].name == "ground_R") {
+                                for (int j = 0; j < 5; j++) {
+                                    tilesToChose.Add(tileId);
+                                }
+                            }
                         }
+
                     }
 
                     // at this point the array shall not be empty
