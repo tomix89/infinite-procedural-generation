@@ -25,6 +25,12 @@ namespace TileTest {
             SKY,
         }
 
+        private enum TileTag {
+            NONE,
+            FLYING_GROUND,
+            CLOUD,
+        }
+
         const int CANVAS_SIZE_X = 10;
         const int CANVAS_SIZE_Y = 8;
 
@@ -44,27 +50,20 @@ namespace TileTest {
 
         private struct TileProp {
 
-            public TileProp(string name, TileType[,] map) {
+            public TileProp(string name, TileType[,] map, TileTag tag = TileTag.NONE) {
                 this.name = name;
                 this.img = new Bitmap("Tiles\\" + name + ".png");
                 // resize
                 this.img = new Bitmap(this.img, new Size(64, 64));
-                
-                this.treats = new HashSet<TileType>();
-                for (int x = 0; x < TILE_TOUCH_POINTS; x++) {
-                    for (int y = 0; y < TILE_TOUCH_POINTS; y++) {
-                        this.treats.Add(map[x, y]); // this auto filters out duplicates
-                    }
-                }
 
+                this.tag = tag;
                 this.map = map;
             }
 
             public string name; // also the path
             public TileType[,] map;
             public Bitmap img;
-            public HashSet<TileType> treats;
-
+            public TileTag tag;
 
             public bool isTileMatching(char side, TileType[,] toMatch) {
 
@@ -84,14 +83,12 @@ namespace TileTest {
                         isMatch &= toMatch[0, 1] == map[1, 1];
                         break;
 
-
                     // we are probing the right of an already placed tile 
                     // to the left side of this 
                     case 'L':
                         isMatch &= toMatch[0, 1] == map[0, 0];
                         isMatch &= toMatch[1, 1] == map[1, 0];
                         break;
-
 
                     // we are probing the left of an already placed tile 
                     // to the right side of this 
@@ -118,38 +115,37 @@ namespace TileTest {
                 new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
                 { TileType.CLOUD, TileType.CLOUD },
                 { TileType.SKY, TileType.SKY }
-            }));
+            }, TileTag.CLOUD));
 
             tiles.Add(new TileProp("cloud_BL",
             new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
                 { TileType.CLOUD, TileType.SKY },
                 { TileType.SKY, TileType.SKY }
-            }));
+            }, TileTag.CLOUD));
 
             tiles.Add(new TileProp("cloud_BR",
             new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
                 { TileType.SKY, TileType.CLOUD },
                 { TileType.SKY, TileType.SKY }
-            }));
-
+            }, TileTag.CLOUD));
 
             tiles.Add(new TileProp("cloud_T",
                 new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
                 { TileType.SKY, TileType.SKY },
                 { TileType.CLOUD, TileType.CLOUD }
-            }));
+            }, TileTag.CLOUD));
 
             tiles.Add(new TileProp("cloud_TL",
                 new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
                 { TileType.SKY, TileType.SKY },
                 { TileType.CLOUD, TileType.SKY }
-            }));
+            }, TileTag.CLOUD));
 
             tiles.Add(new TileProp("cloud_TR",
                 new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
                 { TileType.SKY, TileType.SKY },
                 { TileType.SKY, TileType.CLOUD }
-            }));
+            }, TileTag.CLOUD));
 
             tiles.Add(new TileProp("ground",
                 new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
@@ -181,6 +177,24 @@ namespace TileTest {
                 { TileType.GROUND, TileType.GROUND }
             }));
 
+            tiles.Add(new TileProp("wall_BR",
+                new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
+                { TileType.SKY, TileType.GROUND },
+                { TileType.SKY, TileType.SKY }
+            }, TileTag.FLYING_GROUND));
+
+            tiles.Add(new TileProp("wall_BL",
+            new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
+                { TileType.GROUND, TileType.SKY },
+                { TileType.SKY, TileType.SKY }
+            }, TileTag.FLYING_GROUND));
+
+            tiles.Add(new TileProp("wall_B",
+            new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
+                { TileType.GROUND, TileType.GROUND },
+                { TileType.SKY, TileType.SKY }
+            }, TileTag.FLYING_GROUND));
+
             tiles.Add(new TileProp("sky",
             new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
                 { TileType.SKY, TileType.SKY },
@@ -193,7 +207,7 @@ namespace TileTest {
                 { TileType.GROUND, TileType.SKY }
             }));
 
-            tiles.Add(new TileProp("wall_LT",
+            tiles.Add(new TileProp("wall_TL",
                new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
                 { TileType.SKY, TileType.SKY },
                 { TileType.GROUND, TileType.SKY }
@@ -205,11 +219,12 @@ namespace TileTest {
                 { TileType.SKY, TileType.GROUND }
            }));
 
-            tiles.Add(new TileProp("wall_RT",
+            tiles.Add(new TileProp("wall_TR",
                 new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
                 { TileType.SKY, TileType.SKY },
                 { TileType.SKY, TileType.GROUND }
             }));
+
 
             for (int x = 0; x < CANVAS_SIZE_X; x++) {
                 for (int y = 0; y < CANVAS_SIZE_Y; y++) {
@@ -235,6 +250,8 @@ namespace TileTest {
 
 
         private void generate(int x_start) {
+            Console.WriteLine("---------------------");
+
             HashSet<int> bannedTiles = new HashSet<int>();
 
             // we have to fill in from bottom to top
@@ -252,9 +269,16 @@ namespace TileTest {
                             continue;
                         }
 
-                        // do not put cloud tiles below certein row
-                        if (y > CANVAS_SIZE_Y - 6) {
-                            if (tiles[tileId].name.StartsWith("cloud")) {
+                        // put cloud tiles only to the top rows
+                        if (y > 2) {
+                            if (tiles[tileId].tag == TileTag.CLOUD) {
+                                continue;
+                            }
+                        }
+
+                        // put flying ground tiles only on the mid part
+                        if (tiles[tileId].tag == TileTag.FLYING_GROUND) {
+                            if ((y > CANVAS_SIZE_Y - 3) || (y < 3)) {
                                 continue;
                             }
                         }
@@ -279,15 +303,6 @@ namespace TileTest {
 
                         if (isFitting) {
                             tilesToChose.Add(tileId);
-
-                            // tweak a bit the probabilityes
-                            // as there are too much sky tiles without this
-                            if (tiles[tileId].name == "ground"
-                                || tiles[tileId].name == "ground_R") {
-                                for (int j = 0; j < 5; j++) {
-                                    tilesToChose.Add(tileId);
-                                }
-                            }
                         }
 
                     }
@@ -295,6 +310,7 @@ namespace TileTest {
                     // at this point the array shall not be empty
                     // if it is empty we need to return one step
                     if (tilesToChose.Count == 0) {
+                        Console.WriteLine("Banning: " + tiles[canvas[x, y + 1]].name + " @ " + x + " " + y + " when size is: " + bannedTiles.Count);
                         bannedTiles.Add(canvas[x, y + 1]);
                         y += 2;
                         continue;
