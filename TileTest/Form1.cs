@@ -12,6 +12,7 @@ namespace TileTest {
     public partial class Form1 : Form {
 
         public Form1() {
+            this.DoubleBuffered = true;
             InitializeComponent();
         }
 
@@ -236,13 +237,17 @@ namespace TileTest {
         }
 
         private void Form1_Paint(object sender, PaintEventArgs e) {
+            // by adding an extra pixel we introduce a 1 pixel
+            // line between tiles, makin them more visible
+            int pixWidth = checkBox1.Checked ? 32 : 31;
+
             for (int x = 0; x < CANVAS_SIZE_X; x++) {
                 for (int y = CANVAS_SIZE_Y - 1; y >= 0; y--) {
 
                     if (canvas[x, y] < 0xFF) {
                         e.Graphics.DrawImage(tiles[canvas[x, y]].img,
-                            10 + x * 32 * 2,
-                            10 + y * 32 * 2);
+                            10 + x * pixWidth * 2,
+                            10 + y * pixWidth * 2);
                     }
                 }
             }
@@ -359,7 +364,8 @@ namespace TileTest {
             this.Invalidate();
         }
 
-
-
+        private void checkBox1_CheckedChanged(object sender, EventArgs e) {
+           this.Invalidate();
+        }
     }
 }
