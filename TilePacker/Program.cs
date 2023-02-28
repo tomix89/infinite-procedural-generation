@@ -9,10 +9,12 @@ using System.Threading.Tasks;
 namespace TilePacker {
     class Program {
 
-        enum BuildType { 
-        C_PP,
-        C_SHARP,
+        enum BuildType {
+            C_PP,
+            C_SHARP,
         }
+
+        const BuildType buildType = BuildType.C_SHARP;
 
         // this was only ever run from the editor
         static readonly string TILE_FOLDER_PATH = @"tiles";
@@ -48,7 +50,6 @@ namespace TilePacker {
             return retVal;
         }
 
-
         static void ProcessFile(string filename) {
 
             Console.WriteLine("Processing: " + filename);
@@ -61,7 +62,11 @@ namespace TilePacker {
             string imgName = Path.GetFileNameWithoutExtension(filename);
             imageNamesList.Add(imgName);
 
-            sb.Append("const uint8 " + imgName + "[] = {\n");
+            if (buildType == BuildType.C_PP) {
+                sb.Append("const uint8 " + imgName + "[] = {\n");
+            } else {
+                sb.Append("static readonly byte[] " + imgName + " = {\n");
+            }
 
             // since we will draw lines on the ESP32 in vertical mode, we will code them like this
             for (int x = 0; x < w; ++x) {
@@ -99,7 +104,7 @@ namespace TilePacker {
                         if (x * y < (w - 1) * (h - 1)) {
                             sb.Append(",\n");
                         } else {
-                            sb.Append("\n}"); // last one closes
+                            sb.Append("\n};"); // last one closes
                         }
 
                         cntr = 0;
@@ -111,10 +116,18 @@ namespace TilePacker {
             imageCodedList.Add(sb);
         }
 
-
         static void writeFinalFile() {
             // first all the images
-            var sw = new StreamWriter("tiles.h", false);
+            StreamWriter sw = null;
+
+            if (buildType == BuildType.C_PP) {
+                sw = new StreamWriter("tiles.h", false);
+            } else {
+                sw = new StreamWriter("Tiles.cs", false);
+
+                sw.WriteLine("using System.Collections.Generic;\n");
+                sw.WriteLine("public class Tiles {");
+            }
 
             for (int i = 0; i < imageCodedList.Count; ++i) {
                 sw.Write(imageCodedList[i].ToString());
@@ -122,7 +135,14 @@ namespace TilePacker {
             }
 
             // write out array of images (foe easy enum indexing)
-            sw.WriteLine("const uint8* allTiles[] = {");
+
+
+            if (buildType == BuildType.C_PP) {
+                sw.WriteLine("const uint8* allTiles[] = {");
+            } else {
+                sw.WriteLine("public static readonly List<byte[]> allTiles = new List<byte[]> {");
+            }
+
             for (int i = 0; i < imageNamesList.Count; ++i) {
                 if (i == 0) {
                     sw.Write(INDENT + imageNamesList[i]);
@@ -130,7 +150,7 @@ namespace TilePacker {
                     sw.Write(",\n" + INDENT + imageNamesList[i]);
                 }
             }
-            sw.Write("\n}");
+            sw.Write("\n};");
 
 
 
@@ -139,13 +159,13 @@ namespace TilePacker {
             // write out palette 
             int cntr = 0;
             sw.WriteLine("// in reality only " + palette.Count + " is used");
-            sw.WriteLine("const uint16 palette[] = {");
+            sw.WriteLine("public static readonly ushort[] palette = {");
 
 
 
             for (int i = 0; i <= 0xFF; ++i) {
                 UInt16 num = 0;
-                if ( i < palette.Count) {
+                if (i < palette.Count) {
                     num = palette[i];
                 }
 
@@ -162,7 +182,7 @@ namespace TilePacker {
                     if (i < 255) {
                         sw.Write(",\n");
                     } else {
-                        sw.Write("\n}"); // last one closes
+                        sw.Write("\n};"); // last one closes
                     }
 
                     cntr = 0;
@@ -173,7 +193,7 @@ namespace TilePacker {
 
             sw.Write("\n\n");
             // write out enums
-            sw.WriteLine("enum ImageNames = {");
+            sw.WriteLine("public enum ImageName {");
             for (int i = 0; i < imageNamesList.Count; ++i) {
                 if (i == 0) {
                     sw.Write(INDENT + imageNamesList[i].ToUpper() + "=0");
@@ -183,9 +203,20 @@ namespace TilePacker {
             }
 
             sw.WriteLine("\n}");
+
+            if (buildType == BuildType.C_SHARP) {
+                sw.WriteLine("\n}"); // closes class
+            }
+
+            sw.Flush();
             sw.Close();
+
+
+            if (buildType == BuildType.C_SHARP) {
+                // copy the new file to the main project
+                File.Copy("Tiles.cs", @"..\..\..\TileTest\Tiles.cs", true);
+            }
+
         }
-
-
     }
 }

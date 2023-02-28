@@ -49,19 +49,44 @@ namespace TileTest {
         // canvas 0,0 is top left
         int[,] canvas = new int[CANVAS_SIZE_X, CANVAS_SIZE_Y];
 
+
+        static Bitmap loadImage(Tiles.ImageName name) {
+
+            Bitmap bmp = new Bitmap(32, 32);
+
+            for (int x = 0; x < 32; ++x) {
+                for (int y = 0; y < 32; ++y) {
+
+                    byte clrIdx = Tiles.allTiles[(int)name][x * 32 + y];
+                    ushort clr565 = Tiles.palette[clrIdx];
+
+                    int r, g, b;
+                    r = (clr565 & 0xF800) >> 8;
+                    g = (clr565 & 0x07E0) >> 3;
+                    b = (clr565 & 0x001F) << 3;
+
+                    bmp.SetPixel(x,y, Color.FromArgb(r,g,b));
+                }
+            }
+
+            return bmp;
+        }
+
         private struct TileProp {
 
-            public TileProp(string name, TileType[,] map, TileTag tag = TileTag.NONE) {
+            public TileProp(Tiles.ImageName name, TileType[,] map, TileTag tag = TileTag.NONE) {
                 this.name = name;
-                this.img = new Bitmap("Tiles\\" + name + ".png");
-                // resize
+
+                this.img = loadImage(name);
                 this.img = new Bitmap(this.img, new Size(64, 64));
+
+                // fill the bmp
 
                 this.tag = tag;
                 this.map = map;
             }
 
-            public string name; // also the path
+            public Tiles.ImageName name;
             public TileType[,] map;
             public Bitmap img;
             public TileTag tag;
@@ -112,115 +137,115 @@ namespace TileTest {
 
             rnd = new Random();
 
-            tiles.Add(new TileProp("cloud_B",
+            tiles.Add(new TileProp(Tiles.ImageName.CLOUD_B,
                 new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
                 { TileType.CLOUD, TileType.CLOUD },
                 { TileType.SKY, TileType.SKY }
             }, TileTag.CLOUD));
 
-            tiles.Add(new TileProp("cloud_BL",
+            tiles.Add(new TileProp(Tiles.ImageName.CLOUD_BL,
             new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
                 { TileType.CLOUD, TileType.SKY },
                 { TileType.SKY, TileType.SKY }
             }, TileTag.CLOUD));
 
-            tiles.Add(new TileProp("cloud_BR",
+            tiles.Add(new TileProp(Tiles.ImageName.CLOUD_BR,
             new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
                 { TileType.SKY, TileType.CLOUD },
                 { TileType.SKY, TileType.SKY }
             }, TileTag.CLOUD));
 
-            tiles.Add(new TileProp("cloud_T",
+            tiles.Add(new TileProp(Tiles.ImageName.CLOUD_T,
                 new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
                 { TileType.SKY, TileType.SKY },
                 { TileType.CLOUD, TileType.CLOUD }
             }, TileTag.CLOUD));
 
-            tiles.Add(new TileProp("cloud_TL",
+            tiles.Add(new TileProp(Tiles.ImageName.CLOUD_TL,
                 new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
                 { TileType.SKY, TileType.SKY },
                 { TileType.CLOUD, TileType.SKY }
             }, TileTag.CLOUD));
 
-            tiles.Add(new TileProp("cloud_TR",
+            tiles.Add(new TileProp(Tiles.ImageName.CLOUD_TR,
                 new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
                 { TileType.SKY, TileType.SKY },
                 { TileType.SKY, TileType.CLOUD }
             }, TileTag.CLOUD));
 
-            tiles.Add(new TileProp("ground",
+            tiles.Add(new TileProp(Tiles.ImageName.GROUND,
                 new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
                 { TileType.GROUND, TileType.GROUND },
                 { TileType.GROUND, TileType.GROUND }
             }));
 
-            tiles.Add(new TileProp("ground_L",
+            tiles.Add(new TileProp(Tiles.ImageName.GROUND_L,
              new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
                 { TileType.GROUND, TileType.SKY },
                 { TileType.GROUND, TileType.GROUND }
             }));
 
-            tiles.Add(new TileProp("ground_R",
+            tiles.Add(new TileProp(Tiles.ImageName.GROUND_R,
             new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
                 { TileType.SKY, TileType.GROUND },
                 { TileType.GROUND, TileType.GROUND }
             }));
 
-            tiles.Add(new TileProp("ground_T",
+            tiles.Add(new TileProp(Tiles.ImageName.GROUND_T,
             new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
                 { TileType.SKY, TileType.SKY },
                 { TileType.GROUND, TileType.GROUND }
             }));
 
-            tiles.Add(new TileProp("ground_T2",
+            tiles.Add(new TileProp(Tiles.ImageName.GROUND_T2,
             new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
                 { TileType.SKY, TileType.SKY },
                 { TileType.GROUND, TileType.GROUND }
             }));
 
-            tiles.Add(new TileProp("wall_BR",
+            tiles.Add(new TileProp(Tiles.ImageName.WALL_BR,
                 new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
                 { TileType.SKY, TileType.GROUND },
                 { TileType.SKY, TileType.SKY }
             }, TileTag.FLYING_GROUND));
 
-            tiles.Add(new TileProp("wall_BL",
+            tiles.Add(new TileProp(Tiles.ImageName.WALL_BL,
             new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
                 { TileType.GROUND, TileType.SKY },
                 { TileType.SKY, TileType.SKY }
             }, TileTag.FLYING_GROUND));
 
-            tiles.Add(new TileProp("wall_B",
+            tiles.Add(new TileProp(Tiles.ImageName.WALL_B,
             new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
                 { TileType.GROUND, TileType.GROUND },
                 { TileType.SKY, TileType.SKY }
             }, TileTag.FLYING_GROUND));
 
-            tiles.Add(new TileProp("sky",
+            tiles.Add(new TileProp(Tiles.ImageName.SKY,
             new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
                 { TileType.SKY, TileType.SKY },
                 { TileType.SKY, TileType.SKY }
             }));
 
-            tiles.Add(new TileProp("wall_L",
+            tiles.Add(new TileProp(Tiles.ImageName.WALL_L,
                 new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
                 { TileType.GROUND, TileType.SKY },
                 { TileType.GROUND, TileType.SKY }
             }));
 
-            tiles.Add(new TileProp("wall_TL",
+            tiles.Add(new TileProp(Tiles.ImageName.WALL_TL,
                new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
                 { TileType.SKY, TileType.SKY },
                 { TileType.GROUND, TileType.SKY }
            }));
 
-            tiles.Add(new TileProp("wall_R",
+            tiles.Add(new TileProp(Tiles.ImageName.WALL_R,
                new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
                 { TileType.SKY, TileType.GROUND },
                 { TileType.SKY, TileType.GROUND }
            }));
 
-            tiles.Add(new TileProp("wall_TR",
+            tiles.Add(new TileProp(Tiles.ImageName.WALL_TR,
                 new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
                 { TileType.SKY, TileType.SKY },
                 { TileType.SKY, TileType.GROUND }
