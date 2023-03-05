@@ -378,7 +378,7 @@ namespace TileTest {
             this.Invalidate();
         }
 
-        private void button_scroll_Click(object sender, EventArgs e) {
+        private void button_scroll_tile_Click(object sender, EventArgs e) {
 
             for (int x = 0; x < CANVAS_SIZE_X; x++) {
                 for (int y = 0; y < CANVAS_SIZE_Y; y++) {
@@ -397,8 +397,18 @@ namespace TileTest {
             this.Invalidate();
         }
 
-        private void checkBox1_CheckedChanged(object sender, EventArgs e) {
-           this.Invalidate();
+        private void button_scroll_col_Click(object sender, EventArgs e) {
+            xShift++;
+
+            if (xShift >= 32) {
+
+                xShift = 0;
+                button_scroll_tile_Click(button_scroll_tile, null);
+                return;
+            }
+            
+            this.Invalidate();
         }
+
     }
 }
