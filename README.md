@@ -13,7 +13,7 @@ e.g. the next tile is dependent on the previously placed one, therefore the cont
 \
 The tiles are using a 2x2 'connection' matrix, where i tell the program which tiles are compatible with which.\
 for example a tile:\
-<img src="TileTest\tiles\wall_L.png"
+<img src="TilePacker\tiles\wall_L.png"
      alt="Left Wall"
      width="100"
      style="float: left; margin-right: 10px;" />\
