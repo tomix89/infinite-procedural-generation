@@ -26,7 +26,6 @@ namespace TileTest {
         private void InitializeComponent() {
             this.button_new = new System.Windows.Forms.Button();
             this.button_scroll = new System.Windows.Forms.Button();
-            this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // button_new
@@ -51,26 +50,11 @@ namespace TileTest {
             this.button_scroll.UseVisualStyleBackColor = true;
             this.button_scroll.Click += new System.EventHandler(this.button_scroll_Click);
             // 
-            // checkBox1
-            // 
-            this.checkBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.checkBox1.AutoSize = true;
-            this.checkBox1.Checked = true;
-            this.checkBox1.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBox1.Location = new System.Drawing.Point(755, 86);
-            this.checkBox1.Name = "checkBox1";
-            this.checkBox1.Size = new System.Drawing.Size(88, 17);
-            this.checkBox1.TabIndex = 2;
-            this.checkBox1.Text = "separate tiles";
-            this.checkBox1.UseVisualStyleBackColor = true;
-            this.checkBox1.CheckedChanged += new System.EventHandler(this.checkBox1_CheckedChanged);
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(885, 583);
-            this.Controls.Add(this.checkBox1);
             this.Controls.Add(this.button_scroll);
             this.Controls.Add(this.button_new);
             this.Name = "Form1";
@@ -78,7 +62,6 @@ namespace TileTest {
             this.Load += new System.EventHandler(this.Form1_Load);
             this.Paint += new System.Windows.Forms.PaintEventHandler(this.Form1_Paint);
             this.ResumeLayout(false);
-            this.PerformLayout();
 
         }
 
@@ -86,7 +69,6 @@ namespace TileTest {
 
         private System.Windows.Forms.Button button_new;
         private System.Windows.Forms.Button button_scroll;
-        private System.Windows.Forms.CheckBox checkBox1;
     }
 }
 
