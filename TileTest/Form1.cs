@@ -47,7 +47,7 @@ namespace TileTest {
 
 
         // canvas 0,0 is top left
-        int[,] canvas = new int[CANVAS_SIZE_X, CANVAS_SIZE_Y];
+        Tiles.ImageName[,] canvas = new Tiles.ImageName[CANVAS_SIZE_X, CANVAS_SIZE_Y];
 
 
         static Bitmap loadImage(Tiles.ImageName name) {
@@ -251,10 +251,12 @@ namespace TileTest {
                 { TileType.SKY, TileType.GROUND }
             }));
 
+            // need to sort to match the enum indexes
+            tiles.Sort((s1, s2) => s1.name.CompareTo(s2.name));
 
             for (int x = 0; x < CANVAS_SIZE_X; x++) {
                 for (int y = 0; y < CANVAS_SIZE_Y; y++) {
-                    canvas[x, y] = 0xFF;
+                    canvas[x, y] = Tiles.ImageName.INVALID;
                 }
             }
 
@@ -269,8 +271,8 @@ namespace TileTest {
             for (int x = 0; x < CANVAS_SIZE_X; x++) {
                 for (int y = CANVAS_SIZE_Y - 1; y >= 0; y--) {
 
-                    if (canvas[x, y] < 0xFF) {
-                        e.Graphics.DrawImage(tiles[canvas[x, y]].img,
+                    if (canvas[x, y] < Tiles.ImageName.INVALID) {
+                        e.Graphics.DrawImage(tiles[(int)canvas[x, y]].img,
                             10 + x * pixWidth * 2,
                             10 + y * pixWidth * 2);
                     }
@@ -292,7 +294,7 @@ namespace TileTest {
                     // and therefore we have to test only the 
                     // below and the left tile
                     List<int> tilesToChose = new List<int>();
-                    for (int tileId = 0; tileId < tiles.Count; tileId++) {
+                    for (int tileId = 0; tileId < Tiles.TILES_COUNT; tileId++) {
                         bool isFitting = true;
 
                         if (bannedTiles.Contains(tileId)) {
@@ -328,7 +330,7 @@ namespace TileTest {
                             }
 
                             // if in bounds, check the adjecent tile's constatints
-                            isFitting &= tiles[tileId].isTileMatching(adjDirections[adj], tiles[canvas[xn, yn]].map);
+                            isFitting &= tiles[tileId].isTileMatching(adjDirections[adj], tiles[(int)canvas[xn, yn]].map);
                         }
 
                         if (isFitting) {
@@ -340,8 +342,8 @@ namespace TileTest {
                     // at this point the array shall not be empty
                     // if it is empty we need to return one step
                     if (tilesToChose.Count == 0) {
-                        Console.WriteLine("Banning: " + tiles[canvas[x, y + 1]].name + " @ " + x + " " + y + " when size is: " + bannedTiles.Count);
-                        bannedTiles.Add(canvas[x, y + 1]);
+                        Console.WriteLine("Banning: " + tiles[(int)canvas[x, y + 1]].name + " @ " + x + " " + y + " when size is: " + bannedTiles.Count);
+                        bannedTiles.Add((int)canvas[x, y + 1]);
                         y += 2;
                         continue;
                     }
@@ -350,7 +352,7 @@ namespace TileTest {
 
                     // roll the dice and decide what to paint
                     int randIdx = rnd.Next(0, tilesToChose.Count);
-                    canvas[x, y] = tilesToChose[randIdx];
+                    canvas[x, y] = (Tiles.ImageName)tilesToChose[randIdx];
                 }
             }
 
@@ -360,7 +362,7 @@ namespace TileTest {
 
             for (int x = 0; x < CANVAS_SIZE_X; x++) {
                 for (int y = 0; y < CANVAS_SIZE_Y; y++) {
-                    canvas[x, y] = 0xFF;
+                    canvas[x, y] = Tiles.ImageName.INVALID;
                 }
             }
 
@@ -376,7 +378,7 @@ namespace TileTest {
                 for (int y = 0; y < CANVAS_SIZE_Y; y++) {
 
                     if (x == CANVAS_SIZE_X - 1) {
-                        canvas[x, y] = 0xFF;
+                        canvas[x, y] = Tiles.ImageName.INVALID;
                     } else {
                         canvas[x, y] = canvas[x + 1, y];
                     }

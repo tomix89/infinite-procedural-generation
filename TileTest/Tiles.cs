@@ -1274,28 +1274,6 @@ static readonly byte[] wall_TR = {
     0x04, 0x04, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, 0x02
 };
 
-public static readonly List<byte[]> allTiles = new List<byte[]> {
-    cloud_B,
-    cloud_BL,
-    cloud_BR,
-    cloud_T,
-    cloud_TL,
-    cloud_TR,
-    ground,
-    ground_L,
-    ground_R,
-    ground_T,
-    ground_T2,
-    sky,
-    wall_B,
-    wall_BL,
-    wall_BR,
-    wall_L,
-    wall_R,
-    wall_TL,
-    wall_TR
-};
-
 // in reality only 7 is used
 public static readonly ushort[] palette = {
     0xFFFF, 0x9EDD, 0xBBCA, 0x8802, 0x2589, 0xE8E4, 0x7BEF, 0x0000,
@@ -1332,6 +1310,31 @@ public static readonly ushort[] palette = {
     0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000, 0x0000
 };
 
+
+public const int TILES_COUNT = 19;
+
+public static readonly List<byte[]> allTiles = new List<byte[]> {
+    cloud_B,
+    cloud_BL,
+    cloud_BR,
+    cloud_T,
+    cloud_TL,
+    cloud_TR,
+    ground,
+    ground_L,
+    ground_R,
+    ground_T,
+    ground_T2,
+    sky,
+    wall_B,
+    wall_BL,
+    wall_BR,
+    wall_L,
+    wall_R,
+    wall_TL,
+    wall_TR
+};
+
 public enum ImageName {
     CLOUD_B=0,
     CLOUD_BL,
@@ -1351,7 +1354,8 @@ public enum ImageName {
     WALL_L,
     WALL_R,
     WALL_TL,
-    WALL_TR
+    WALL_TR,
+    INVALID=0xFF
 }
 
 }

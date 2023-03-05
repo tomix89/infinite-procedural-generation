@@ -134,33 +134,13 @@ namespace TilePacker {
                 sw.Write("\n\n");
             }
 
-            // write out array of images (foe easy enum indexing)
 
 
-            if (buildType == BuildType.C_PP) {
-                sw.WriteLine("const uint8* allTiles[] = {");
-            } else {
-                sw.WriteLine("public static readonly List<byte[]> allTiles = new List<byte[]> {");
-            }
-
-            for (int i = 0; i < imageNamesList.Count; ++i) {
-                if (i == 0) {
-                    sw.Write(INDENT + imageNamesList[i]);
-                } else {
-                    sw.Write(",\n" + INDENT + imageNamesList[i]);
-                }
-            }
-            sw.Write("\n};");
-
-
-
-            sw.Write("\n\n");
             Console.WriteLine("Total palette colors: " + palette.Count);
             // write out palette 
             int cntr = 0;
             sw.WriteLine("// in reality only " + palette.Count + " is used");
             sw.WriteLine("public static readonly ushort[] palette = {");
-
 
 
             for (int i = 0; i <= 0xFF; ++i) {
@@ -190,6 +170,35 @@ namespace TilePacker {
             }
 
 
+            // helper for counting
+            sw.Write("\n\n\n");
+
+            if (buildType == BuildType.C_PP) {
+                sw.WriteLine("const uint16 TILE_COUNT = " + imageNamesList.Count + ";");
+            } else {
+                sw.WriteLine("public const int TILES_COUNT = " + imageNamesList.Count + ";");
+            }
+
+            
+
+            // write out array of images (for easy enum indexing)
+            sw.Write("\n");
+            if (buildType == BuildType.C_PP) {
+                sw.WriteLine("const uint8* allTiles[] = {");
+            } else {
+                sw.WriteLine("public static readonly List<byte[]> allTiles = new List<byte[]> {");
+            }
+
+            for (int i = 0; i < imageNamesList.Count; ++i) {
+                if (i == 0) {
+                    sw.Write(INDENT + imageNamesList[i]);
+                } else {
+                    sw.Write(",\n" + INDENT + imageNamesList[i]);
+                }
+            }
+            sw.Write("\n};");
+
+
 
             sw.Write("\n\n");
             // write out enums
@@ -202,6 +211,7 @@ namespace TilePacker {
                 }
             }
 
+            sw.Write(",\n" + INDENT + "INVALID=0xFF");
             sw.WriteLine("\n}");
 
             if (buildType == BuildType.C_SHARP) {
