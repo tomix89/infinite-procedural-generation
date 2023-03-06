@@ -254,6 +254,8 @@ namespace TileTest {
             }
 
             generate(0);
+
+            cBScrollSpeed.DataSource = Enum.GetNames(typeof(ScrollSpeed));
         }
 
         // https://stackoverflow.com/questions/11456440/how-to-resize-a-bitmap-image-in-c-sharp-without-blending-or-filtering
@@ -410,5 +412,35 @@ namespace TileTest {
             this.Invalidate();
         }
 
+
+
+        private enum ScrollSpeed {
+            NO_SCROLL = 0,
+            FPS_1,
+            FPS_2,
+            FPS_5,
+            FPS_10,
+            FPS_20,
+            FPS_50,
+        }
+
+        private void cBScrollSpeed_SelectedIndexChanged(object sender, EventArgs e) {
+
+            ScrollSpeed ss = (ScrollSpeed)cBScrollSpeed.SelectedIndex;
+
+
+            if (cBScrollSpeed.SelectedIndex == 0) {
+                timer1.Stop();
+            } else {
+                timer1.Interval = (int)Math.Round(2148.7190921026 * Math.Exp(-0.76487189348237 * cBScrollSpeed.SelectedIndex));
+                timer1.Start();
+                Console.WriteLine(timer1.Interval);
+            }
+
+        }
+
+        private void timer1_Tick(object sender, EventArgs e) {
+            button_scroll_col_Click(button_scroll_col, null);
+        }
     }
 }
