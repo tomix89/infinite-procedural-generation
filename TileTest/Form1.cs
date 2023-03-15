@@ -24,12 +24,14 @@ namespace TileTest {
             GROUND,
             CLOUD,
             SKY,
+            BIGHOUSE,
         }
 
         private enum TileTag {
             NONE,
             FLYING_GROUND,
             CLOUD,
+            BIGHOUSE_NOT_BASE,
         }
 
         const int CANVAS_SIZE_X = 10+1; // canvas needs to be one tile more to X as we will scroll in X direction
@@ -130,6 +132,60 @@ namespace TileTest {
 
             rnd = new Random();
 
+            tiles.Add(new TileProp(Tiles.ImageName.BIGHOUSE_MB,
+            new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
+                { TileType.BIGHOUSE, TileType.BIGHOUSE },
+                { TileType.GROUND, TileType.GROUND }
+            }));
+
+            tiles.Add(new TileProp(Tiles.ImageName.BIGHOUSE_MT,
+            new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
+                { TileType.SKY, TileType.SKY },
+                { TileType.BIGHOUSE, TileType.BIGHOUSE  }
+            }, TileTag.BIGHOUSE_NOT_BASE));
+
+            tiles.Add(new TileProp(Tiles.ImageName.BIGHOUSE_LB,
+            new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
+                { TileType.BIGHOUSE, TileType.SKY },
+                { TileType.GROUND, TileType.GROUND }
+            }));
+
+            tiles.Add(new TileProp(Tiles.ImageName.BIGHOUSE_LT,
+            new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
+                { TileType.SKY, TileType.SKY },
+                { TileType.BIGHOUSE, TileType.SKY }
+            }, TileTag.BIGHOUSE_NOT_BASE));
+
+            tiles.Add(new TileProp(Tiles.ImageName.BIGHOUSE_RB,
+            new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
+                { TileType.SKY, TileType.BIGHOUSE },
+                { TileType.GROUND, TileType.GROUND }
+            }));
+
+            tiles.Add(new TileProp(Tiles.ImageName.BIGHOUSE_RT,
+            new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
+                { TileType.SKY, TileType.SKY },
+                { TileType.SKY, TileType.BIGHOUSE }
+            }, TileTag.BIGHOUSE_NOT_BASE));
+
+            tiles.Add(new TileProp(Tiles.ImageName.BIGHOUSE_MM,
+            new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
+                { TileType.BIGHOUSE, TileType.BIGHOUSE },
+                { TileType.BIGHOUSE, TileType.BIGHOUSE }
+            }, TileTag.BIGHOUSE_NOT_BASE));
+
+            tiles.Add(new TileProp(Tiles.ImageName.BIGHOUSE_ML,
+            new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
+                { TileType.BIGHOUSE, TileType.SKY },
+                { TileType.BIGHOUSE, TileType.SKY }
+            }, TileTag.BIGHOUSE_NOT_BASE));
+
+            tiles.Add(new TileProp(Tiles.ImageName.BIGHOUSE_MR,
+            new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
+                { TileType.SKY, TileType.BIGHOUSE },
+                { TileType.SKY, TileType.BIGHOUSE }
+            }, TileTag.BIGHOUSE_NOT_BASE));
+
             tiles.Add(new TileProp(Tiles.ImageName.CLOUD_B,
                 new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
                 { TileType.CLOUD, TileType.CLOUD },
@@ -190,7 +246,25 @@ namespace TileTest {
                 { TileType.GROUND, TileType.GROUND }
             }));
 
-            tiles.Add(new TileProp(Tiles.ImageName.GROUND_T2,
+           tiles.Add(new TileProp(Tiles.ImageName.GROUND_T_TREE1,
+           new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
+                { TileType.SKY, TileType.SKY },
+                { TileType.GROUND, TileType.GROUND }
+           }));
+
+           tiles.Add(new TileProp(Tiles.ImageName.GROUND_T_TREE2,
+           new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
+                { TileType.SKY, TileType.SKY },
+                { TileType.GROUND, TileType.GROUND }
+           }));
+
+            tiles.Add(new TileProp(Tiles.ImageName.GROUND_T_HOUSE1,
+            new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
+                { TileType.SKY, TileType.SKY },
+                { TileType.GROUND, TileType.GROUND }
+            }));
+
+            tiles.Add(new TileProp(Tiles.ImageName.GROUND_T_HOUSE2,
             new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
                 { TileType.SKY, TileType.SKY },
                 { TileType.GROUND, TileType.GROUND }
@@ -307,6 +381,13 @@ namespace TileTest {
 
                         if (bannedTiles.Contains(tileId)) {
                             continue;
+                        }
+
+                        // do not put bighouse tiles to the bottom most row
+                        if (y >= CANVAS_SIZE_Y - 1) {
+                            if (tiles[tileId].tag == TileTag.BIGHOUSE_NOT_BASE) {
+                                continue;
+                            }
                         }
 
                         // put cloud tiles only to the top rows
