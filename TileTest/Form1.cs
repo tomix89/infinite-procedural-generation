@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 namespace TileTest {
@@ -18,7 +19,7 @@ namespace TileTest {
 
         const int TILE_TOUCH_POINTS = 2;
 
-        Random rnd;
+        Random rnd;    
 
         private enum TileType {
             GROUND,
@@ -34,7 +35,7 @@ namespace TileTest {
             BIGHOUSE_NOT_BASE,
         }
 
-        const int CANVAS_SIZE_X = 10+1; // canvas needs to be one tile more to X as we will scroll in X direction
+        const int CANVAS_SIZE_X = 10 + 1; // canvas needs to be one tile more to X as we will scroll in X direction
         const int CANVAS_SIZE_Y = 8;
 
         // canvas 0,0 is top left
@@ -51,12 +52,14 @@ namespace TileTest {
 
         char[] adjDirections = new char[2] { 'B', 'L' };
 
-        // so in ESSP 32 we don't have RAM to contain a full 16b image, so we will write it line by line
+        // so in ESSP 32 we don't have RAM to contain a full 16b image, so we will write it col by col
         // emulating this here will be via one large bitmap (to overcome writing to the form directly)
-        static Bitmap display = new Bitmap(320, 240);
+        static ushort[,] display = new ushort[320, 240];
+        byte[] linearDisplayBuff = new byte[display.Length * 2];
+        Bitmap screen = new Bitmap(320, 240, PixelFormat.Format16bppRgb565);
+   
 
-
-        static void writeTileCol(Tiles.ImageName name, int tileCol, int dispCol, int yIdx) {
+        void writeTileCol(Tiles.ImageName name, int tileCol, int dispCol, int yIdx) {
             int offset = 0;
             // the topmost tile is drawn only from half
             if (yIdx == 0) {
@@ -65,12 +68,8 @@ namespace TileTest {
             for (int y = offset; y < 32; ++y) {
                 byte clrIdx = Tiles.allTiles[(int)name][tileCol * 32 + y];
                 ushort clr565 = Tiles.palette[clrIdx];
-                // this won't be necessary for ESP32, that works with 565 color
-                int r, g, b;
-                r = (clr565 & 0xF800) >> 8;
-                g = (clr565 & 0x07E0) >> 3;
-                b = (clr565 & 0x001F) << 3;
-                display.SetPixel(dispCol, y - 16 + yIdx * 32, Color.FromArgb(r, g, b));
+
+                display[dispCol, y - 16 + yIdx * 32] = clr565;
             }
         }
 
@@ -246,17 +245,17 @@ namespace TileTest {
                 { TileType.GROUND, TileType.GROUND }
             }));
 
-           tiles.Add(new TileProp(Tiles.ImageName.GROUND_T_TREE1,
-           new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
+            tiles.Add(new TileProp(Tiles.ImageName.GROUND_T_TREE1,
+            new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
                 { TileType.SKY, TileType.SKY },
                 { TileType.GROUND, TileType.GROUND }
-           }));
+            }));
 
-           tiles.Add(new TileProp(Tiles.ImageName.GROUND_T_TREE2,
-           new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
+            tiles.Add(new TileProp(Tiles.ImageName.GROUND_T_TREE2,
+            new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
                 { TileType.SKY, TileType.SKY },
                 { TileType.GROUND, TileType.GROUND }
-           }));
+            }));
 
             tiles.Add(new TileProp(Tiles.ImageName.GROUND_T_HOUSE1,
             new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
@@ -357,7 +356,18 @@ namespace TileTest {
                     }
                 }
             }
-            Bitmap resized = ResizeBitmap(display, 320*2, 240*2);
+
+            // copy the 16b colors to a linear buffer for bitmap conversion
+            int cntr = 0;
+            for (int y = 0; y < 240; ++y) {
+                for (int x = 0; x < 320; ++x) {
+                    linearDisplayBuff[cntr++] = (byte)(display[x, y] & 0x00FF);
+                    linearDisplayBuff[cntr++] = (byte)((display[x, y] >> 8) & 0x00FF); 
+                }
+            }
+
+            ImageFromRaw565Array(linearDisplayBuff, screen, 320, 240);
+            Bitmap resized = ResizeBitmap(screen, 320 * 2, 240 * 2);
             e.Graphics.DrawImage(resized, 10, 10);
             resized.Dispose();
         }
@@ -489,7 +499,6 @@ namespace TileTest {
                 button_scroll_tile_Click(button_scroll_tile, null);
                 return;
             }
-            
             this.Invalidate();
         }
 
@@ -503,6 +512,7 @@ namespace TileTest {
             FPS_10,
             FPS_20,
             FPS_50,
+            FPS_100,
         }
 
         private void cBScrollSpeed_SelectedIndexChanged(object sender, EventArgs e) {
@@ -523,5 +533,17 @@ namespace TileTest {
         private void timer1_Tick(object sender, EventArgs e) {
             button_scroll_col_Click(button_scroll_col, null);
         }
+
+
+        // https://stackoverflow.com/a/24315437
+        private static Bitmap ImageFromRaw565Array(byte[] arr, Bitmap output, int width, int height) {
+            var rect = new Rectangle(0, 0, width, height);
+            var bmpData = output.LockBits(rect, ImageLockMode.ReadWrite, output.PixelFormat);
+            var ptr = bmpData.Scan0;
+            Marshal.Copy(arr, 0, ptr, arr.Length);
+            output.UnlockBits(bmpData);
+            return output;
+        }
+
     }
 }
