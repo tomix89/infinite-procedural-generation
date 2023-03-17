@@ -129,7 +129,6 @@ namespace TileTest {
         private List<TileProp> tiles = new List<TileProp>();
 
         private void Form1_Load(object sender, EventArgs e) {
-
             rnd = new Random();
 
             tiles.Add(new TileProp(Tiles.ImageName.BIGHOUSE_MB,
@@ -422,7 +421,7 @@ namespace TileTest {
 
                     // and therefore we have to test only the 
                     // below and the left tile
-                    List<int> tilesToChose = new List<int>();
+                    cHashSet tilesToChose = new cHashSet(Tiles.TILES_COUNT);
                     for (int tileId = 0; tileId < Tiles.TILES_COUNT; tileId++) {
                         bool isFitting = true;
 
@@ -470,14 +469,14 @@ namespace TileTest {
                         }
 
                         if (isFitting) {
-                            tilesToChose.Add(tileId);
+                            tilesToChose.add(tileId);
                         }
 
                     }
 
                     // at this point the array shall not be empty
                     // if it is empty we need to return one step
-                    if (tilesToChose.Count == 0) {
+                    if (tilesToChose.count() == 0) {
                         Console.WriteLine("Banning: " + tiles[(int)canvas[x, y + 1]].name + " @ " + x + " " + y + " when size is: " + bannedTiles.count());
                         bannedTiles.add((int)canvas[x, y + 1]);
                         y += 2;
@@ -487,8 +486,8 @@ namespace TileTest {
                     bannedTiles.clear();
 
                     // roll the dice and decide what to paint
-                    int randIdx = rnd.Next(0, tilesToChose.Count);
-                    canvas[x, y] = (Tiles.ImageName)tilesToChose[randIdx];
+                    int randIdx = rnd.Next(0, tilesToChose.count());
+                    canvas[x, y] = (Tiles.ImageName)tilesToChose.getValueOfIndex((UInt32)randIdx);
                 }
             }
 
