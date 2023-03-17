@@ -26,6 +26,7 @@ namespace TileTest {
             CLOUD,
             SKY,
             BIGHOUSE,
+            FOREST,
         }
 
         private enum TileTag {
@@ -221,6 +222,42 @@ namespace TileTest {
                 { TileType.SKY, TileType.CLOUD }
             }, TileTag.CLOUD));
 
+            tiles.Add(new TileProp(Tiles.ImageName.FOREST_BL,
+            new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
+                { TileType.FOREST, TileType.SKY },
+                { TileType.GROUND, TileType.GROUND }
+            }, TileTag.CLOUD));
+
+            tiles.Add(new TileProp(Tiles.ImageName.FOREST_BM,
+            new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
+                { TileType.FOREST, TileType.FOREST },
+                { TileType.GROUND, TileType.GROUND }
+            }, TileTag.CLOUD));
+
+            tiles.Add(new TileProp(Tiles.ImageName.FOREST_BR,
+            new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
+                { TileType.SKY, TileType.FOREST },
+                { TileType.GROUND, TileType.GROUND }
+            }, TileTag.CLOUD));
+
+            tiles.Add(new TileProp(Tiles.ImageName.FOREST_TL,
+            new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
+                { TileType.SKY, TileType.SKY },
+                { TileType.FOREST, TileType.SKY }
+            }, TileTag.CLOUD));
+
+            tiles.Add(new TileProp(Tiles.ImageName.FOREST_TM,
+            new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
+                { TileType.SKY, TileType.SKY },
+                { TileType.FOREST, TileType.FOREST }
+            }, TileTag.CLOUD));
+
+            tiles.Add(new TileProp(Tiles.ImageName.FOREST_TR,
+            new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
+                { TileType.SKY, TileType.SKY },
+                { TileType.SKY, TileType.FOREST }
+            }, TileTag.CLOUD));
+
             tiles.Add(new TileProp(Tiles.ImageName.GROUND,
                 new TileType[TILE_TOUCH_POINTS, TILE_TOUCH_POINTS] {
                 { TileType.GROUND, TileType.GROUND },
@@ -376,7 +413,7 @@ namespace TileTest {
         private void generate(int x_start) {
             Console.WriteLine("---------------------");
 
-            HashSet<int> bannedTiles = new HashSet<int>();
+            cHashSet bannedTiles = new cHashSet(Tiles.TILES_COUNT);
 
             // we have to fill in from bottom to top
             // to overcome invalid placing (sky below ground)
@@ -389,7 +426,7 @@ namespace TileTest {
                     for (int tileId = 0; tileId < Tiles.TILES_COUNT; tileId++) {
                         bool isFitting = true;
 
-                        if (bannedTiles.Contains(tileId)) {
+                        if (bannedTiles.contains(tileId)) {
                             continue;
                         }
 
@@ -441,13 +478,13 @@ namespace TileTest {
                     // at this point the array shall not be empty
                     // if it is empty we need to return one step
                     if (tilesToChose.Count == 0) {
-                        Console.WriteLine("Banning: " + tiles[(int)canvas[x, y + 1]].name + " @ " + x + " " + y + " when size is: " + bannedTiles.Count);
-                        bannedTiles.Add((int)canvas[x, y + 1]);
+                        Console.WriteLine("Banning: " + tiles[(int)canvas[x, y + 1]].name + " @ " + x + " " + y + " when size is: " + bannedTiles.count());
+                        bannedTiles.add((int)canvas[x, y + 1]);
                         y += 2;
                         continue;
                     }
 
-                    bannedTiles.Clear();
+                    bannedTiles.clear();
 
                     // roll the dice and decide what to paint
                     int randIdx = rnd.Next(0, tilesToChose.Count);
