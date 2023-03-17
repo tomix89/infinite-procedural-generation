@@ -495,7 +495,8 @@ namespace TileTest {
         }
 
         private void button_new_Click(object sender, EventArgs e) {
-
+            xShift = 0;
+            cBScrollSpeed.SelectedIndex = 0; // will stop auto scroll if running
             for (int x = 0; x < CANVAS_SIZE_X; x++) {
                 for (int y = 0; y < CANVAS_SIZE_Y; y++) {
                     canvas[x, y] = Tiles.ImageName.INVALID;
